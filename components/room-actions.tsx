@@ -14,7 +14,6 @@ type Room = {
   _id: string;
   name: string;
   roomType: string;
-  bedSize: string;
   occupancy: number;
   status: "available" | "occupied";
   booking?: {
@@ -48,7 +47,6 @@ export function RoomActions({ room, currentUserId, userRole }: { room: Room; cur
   const [editForm, setEditForm] = useState({
     name: room.name,
     roomType: room.roomType,
-    bedSize: room.bedSize,
     occupancy: room.occupancy
   });
 
@@ -139,7 +137,7 @@ export function RoomActions({ room, currentUserId, userRole }: { room: Room; cur
             variant="outline"
             className="flex-1 text-xs"
             onClick={() => {
-              setEditForm({ name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy });
+              setEditForm({ name: room.name, roomType: room.roomType, occupancy: room.occupancy });
               setShowEditModal(true);
             }}
           >
@@ -175,14 +173,14 @@ export function RoomActions({ room, currentUserId, userRole }: { room: Room; cur
       {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4" onClick={() => setShowEditModal(false)}>
-          <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-4 flex items-center justify-between">
+          <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center justify-between border-b border-slate-100 p-6">
               <h3 className="text-xl font-bold text-slate-800">Edit {room.name}</h3>
               <button type="button" className="text-2xl text-slate-400 hover:text-slate-600" onClick={() => setShowEditModal(false)}>
                 ✕
               </button>
             </div>
-            <form className="space-y-4" onSubmit={handleEdit}>
+            <form className="space-y-4 max-h-[20vh] overflow-y-auto p-6" onSubmit={handleEdit}>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">Room name</label>
                 <Input value={editForm.name} onChange={(event) => setEditForm((current) => ({ ...current, name: event.target.value }))} />
@@ -191,16 +189,6 @@ export function RoomActions({ room, currentUserId, userRole }: { room: Room; cur
                 <label className="text-sm font-medium text-slate-700">Room type</label>
                 <Select value={editForm.roomType} onChange={(event) => setEditForm((current) => ({ ...current, roomType: event.target.value }))}>
                   {ROOM_TYPES.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Bed size</label>
-                <Select value={editForm.bedSize} onChange={(event) => setEditForm((current) => ({ ...current, bedSize: event.target.value }))}>
-                  {BED_SIZES.map((option) => (
                     <option key={option} value={option}>
                       {option}
                     </option>
@@ -224,7 +212,7 @@ export function RoomActions({ room, currentUserId, userRole }: { room: Room; cur
                   placeholder="1-10"
                 />
               </div>
-              <div className="flex gap-3 pt-4">
+              <div className="sticky bottom-0 flex gap-3 border-t border-slate-100 pt-4">
                 <Button type="button" variant="outline" className="flex-1" onClick={() => setShowEditModal(false)}>
                   Cancel
                 </Button>

@@ -26,7 +26,6 @@ type RoomFormState = {
   hotelId: string;
   name: string;
   roomType: (typeof ROOM_TYPES)[number];
-  bedSize: (typeof BED_SIZES)[number];
   occupancy: number;
 };
 
@@ -39,7 +38,7 @@ type User = {
 export function DashboardClient({ hotels, users, role }: { hotels: Hotel[]; users: User[]; role: string }) {
   const router = useRouter();
   const [hotelForm, setHotelForm] = useState({ name: "", location: "", description: "" });
-  const [roomForm, setRoomForm] = useState<RoomFormState>({ hotelId: "", name: "", roomType: ROOM_TYPES[0], bedSize: BED_SIZES[0], occupancy: 1 });
+  const [roomForm, setRoomForm] = useState<RoomFormState>({ hotelId: "", name: "", roomType: ROOM_TYPES[0], occupancy: 1 });
   const [userForm, setUserForm] = useState({ username: "", password: "", role: "user" });
   const [hotelLoading, setHotelLoading] = useState(false);
   const [roomLoading, setRoomLoading] = useState(false);
@@ -89,7 +88,7 @@ export function DashboardClient({ hotels, users, role }: { hotels: Hotel[]; user
     }
 
     toast.success("Room created");
-    setRoomForm({ hotelId: "", name: "", roomType: ROOM_TYPES[0], bedSize: BED_SIZES[0], occupancy: 1 });
+    setRoomForm({ hotelId: "", name: "", roomType: ROOM_TYPES[0], occupancy: 1 });
     router.refresh();
   }
 
@@ -214,16 +213,6 @@ export function DashboardClient({ hotels, users, role }: { hotels: Hotel[]; user
                   <label className="text-sm font-medium text-slate-700">Room type</label>
                   <Select value={roomForm.roomType} onChange={(event) => setRoomForm((current) => ({ ...current, roomType: event.target.value as typeof ROOM_TYPES[number] }))}>
                     {ROOM_TYPES.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Bed size</label>
-                  <Select value={roomForm.bedSize} onChange={(event) => setRoomForm((current) => ({ ...current, bedSize: event.target.value as typeof BED_SIZES[number] }))}>
-                    {BED_SIZES.map((option) => (
                       <option key={option} value={option}>
                         {option}
                       </option>

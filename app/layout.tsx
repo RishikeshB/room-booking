@@ -15,6 +15,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body suppressHydrationWarning={true}>
         <div className="app-shell">{children}</div>
         <Toaster position="top-right" richColors />
+        <div id="modal-container" style={{ position: 'fixed', inset: 0, zIndex: 999999, pointerEvents: 'none' }} />
       </body>
     </html>
   );

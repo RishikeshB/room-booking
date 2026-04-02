@@ -14,11 +14,7 @@ export function AppHeader({ title, subtitle, role }: { title: string; subtitle: 
         <p className="mt-1 text-sm text-slate-600">{subtitle}</p>
       </div>
       <div className="flex items-center gap-3">
-        {role === "admin" ? (
-          <Link className="rounded-2xl bg-brand-100 px-4 py-2.5 text-sm font-semibold text-brand-900 transition hover:bg-brand-200" href="/book">User booking view</Link>
-        ) : (
-          <Link className="rounded-2xl bg-brand-100 px-4 py-2.5 text-sm font-semibold text-brand-900 transition hover:bg-brand-200" href="/admin">Dashboard</Link>
-        )}
+        <Link className="rounded-2xl bg-brand-100 px-4 py-2.5 text-sm font-semibold text-brand-900 transition hover:bg-brand-200" href="/admin">Dashboard</Link>
         <LogoutButton />
       </div>
     </header>

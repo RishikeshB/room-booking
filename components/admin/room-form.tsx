@@ -12,14 +12,12 @@ import { BED_SIZES, ROOM_TYPES } from "@/lib/constants";
 type RoomFormState = {
   name: string;
   roomType: (typeof ROOM_TYPES)[number];
-  bedSize: (typeof BED_SIZES)[number];
   occupancy: number;
 };
 
 const initialState: RoomFormState = {
   name: "",
   roomType: ROOM_TYPES[0],
-  bedSize: BED_SIZES[0],
   occupancy: 1
 };
 
@@ -65,12 +63,6 @@ export function RoomForm({ hotelId }: { hotelId: string }) {
         <label className="text-sm font-medium text-slate-700">Room type</label>
         <Select value={form.roomType} onChange={(event) => setForm((current) => ({ ...current, roomType: event.target.value as RoomFormState["roomType"] }))}>
           {ROOM_TYPES.map((option) => <option key={option} value={option}>{option}</option>)}
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-700">Bed size</label>
-        <Select value={form.bedSize} onChange={(event) => setForm((current) => ({ ...current, bedSize: event.target.value as RoomFormState["bedSize"] }))}>
-          {BED_SIZES.map((option) => <option key={option} value={option}>{option}</option>)}
         </Select>
       </div>
       <div className="space-y-2">

@@ -18,11 +18,6 @@ const roomSchema = new Schema(
       enum: ["AC", "AC Window", "Non-AC"],
       required: true
     },
-    bedSize: {
-      type: String,
-      enum: ["King", "Queen", "Twin"],
-      required: true
-    },
     occupancy: {
       type: Number,
       required: true,

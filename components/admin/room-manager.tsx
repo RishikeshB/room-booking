@@ -7,23 +7,22 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { BED_SIZES, ROOM_TYPES } from "@/lib/constants";
+import { ROOM_TYPES } from "@/lib/constants";
 
 type Room = {
   _id: string;
   name: string;
   roomType: (typeof ROOM_TYPES)[number];
-  bedSize: (typeof BED_SIZES)[number];
   occupancy: number;
   status: "available" | "occupied";
 };
 
-type Drafts = Record<string, Pick<Room, "name" | "roomType" | "bedSize" | "occupancy">>;
+type Drafts = Record<string, Pick<Room, "name" | "roomType" | "occupancy">>;
 
 export function RoomManager({ rooms }: { rooms: Room[] }) {
   const router = useRouter();
   const [drafts, setDrafts] = useState<Drafts>(
-    Object.fromEntries(rooms.map((room) => [room._id, { name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy }]))
+    Object.fromEntries(rooms.map((room) => [room._id, { name: room.name, roomType: room.roomType, occupancy: room.occupancy }]))
   );
   const [savingId, setSavingId] = useState<string | null>(null);
 
@@ -70,31 +69,26 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
       </div>
       <div className="mt-4 space-y-4">
         {rooms.map((room) => (
-          <div className="rounded-3xl border border-brand-100 bg-white p-4" key={room._id}>
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <p className="font-semibold text-ink">{room.name}</p>
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${room.status === "occupied" ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`}>{room.status}</span>
+          <div className="rounded-3xl border border-brand-100 bg-white p-3" key={room._id}>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="font-semibold text-ink text-sm">Room No: {room.name}</p>
+              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${room.status === "occupied" ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`}>{room.status}</span>
             </div>
-            <div className="grid gap-3 md:grid-cols-[1fr_0.8fr_0.6fr_0.6fr_auto] md:items-end">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Room name</label>
-                <Input value={drafts[room._id]?.name ?? room.name} onChange={(event) => setDrafts((current) => ({ ...current, [room._id]: { ...(current[room._id] ?? { name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy }), name: event.target.value } }))} />
+            <div className="grid gap-2 md:grid-cols-[1fr_0.7fr_0.5fr_auto] md:items-end">
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-slate-600">Room name</label>
+                <Input className="text-xs h-8" value={drafts[room._id]?.name ?? room.name} onChange={(event) => setDrafts((current) => ({ ...current, [room._id]: { ...(current[room._id] ?? { name: room.name, roomType: room.roomType, occupancy: room.occupancy }), name: event.target.value } }))} />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Room type</label>
-                <Select value={drafts[room._id]?.roomType ?? room.roomType} onChange={(event) => setDrafts((current) => ({ ...current, [room._id]: { ...(current[room._id] ?? { name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy }), roomType: event.target.value as Room["roomType"] } }))}>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-slate-600">Room type</label>
+                <Select className="text-xs h-8" value={drafts[room._id]?.roomType ?? room.roomType} onChange={(event) => setDrafts((current) => ({ ...current, [room._id]: { ...(current[room._id] ?? { name: room.name, roomType: room.roomType, occupancy: room.occupancy }), roomType: event.target.value as Room["roomType"] } }))}>
                   {ROOM_TYPES.map((option) => <option key={option} value={option}>{option}</option>)}
                 </Select>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Bed size</label>
-                <Select value={drafts[room._id]?.bedSize ?? room.bedSize} onChange={(event) => setDrafts((current) => ({ ...current, [room._id]: { ...(current[room._id] ?? { name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy }), bedSize: event.target.value as Room["bedSize"] } }))}>
-                  {BED_SIZES.map((option) => <option key={option} value={option}>{option}</option>)}
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Occupancy</label>
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-slate-600">Occupancy</label>
                 <Input
+                  className="text-xs h-8"
                   type="number"
                   min="1"
                   max="10"
@@ -106,7 +100,7 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
                       setDrafts((current) => ({
                         ...current,
                         [room._id]: {
-                          ...(current[room._id] ?? { name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy }),
+                          ...(current[room._id] ?? { name: room.name, roomType: room.roomType, occupancy: room.occupancy }),
                           occupancy: Math.min(10, Math.max(1, numValue))
                         }
                       }));
@@ -115,7 +109,7 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
                   placeholder="1-10"
                 />
               </div>
-              <Button disabled={savingId === room._id} onClick={() => saveRoom(room._id)} type="button">
+              <Button disabled={savingId === room._id} onClick={() => saveRoom(room._id)} type="button" className="text-xs h-8 px-3">
                 {savingId === room._id ? "Saving..." : "Save"}
               </Button>
             </div>

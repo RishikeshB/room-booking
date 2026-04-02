@@ -13,7 +13,7 @@ type RoomOption = {
   _id: string;
   name: string;
   roomType: string;
-  bedSize: string;
+  occupancy: number;
 };
 
 type HotelOption = {
@@ -27,12 +27,12 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
   const router = useRouter();
   const [hotelId, setHotelId] = useState("");
   const [roomType, setRoomType] = useState("");
-  const [bedSize, setBedSize] = useState("");
   const [roomId, setRoomId] = useState("");
   const [userName, setUserName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [showFullPhoto, setShowFullPhoto] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
@@ -46,25 +46,29 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
       return [];
     }
 
-    return selectedHotel.rooms.filter((room) => {
+    const rooms = selectedHotel.rooms.filter((room) => {
       const matchRoomType = roomType ? room.roomType === roomType : true;
-      const matchBed = bedSize ? room.bedSize === bedSize : true;
-      return matchRoomType && matchBed;
+      return matchRoomType;
     });
-  }, [bedSize, roomType, selectedHotel]);
+
+    // Sort by room number (extract numeric part for proper sorting)
+    return rooms.sort((a, b) => {
+      const numA = parseInt(a.name.replace(/\D/g, '')) || 0;
+      const numB = parseInt(b.name.replace(/\D/g, '')) || 0;
+      return numA - numB;
+    });
+  }, [roomType, selectedHotel]);
 
   const roomTypes = useMemo(() => Array.from(new Set((selectedHotel?.rooms ?? []).map((room) => room.roomType))), [selectedHotel]);
-  const bedSizes = useMemo(() => Array.from(new Set((selectedHotel?.rooms ?? []).map((room) => room.bedSize))), [selectedHotel]);
 
   useEffect(() => {
     setRoomType("");
-    setBedSize("");
     setRoomId("");
   }, [hotelId]);
 
   useEffect(() => {
     setRoomId("");
-  }, [roomType, bedSize]);
+  }, [roomType]);
 
   useEffect(() => {
     if (!photoFile) {
@@ -144,26 +148,41 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
   async function submitBooking(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!photoFile) {
-      toast.error("Please capture or upload a resident photo.");
+    // Validate required fields
+    if (!userName.trim()) {
+      toast.error("Please enter resident name");
+      return;
+    }
+
+    if (!contactNumber.trim()) {
+      toast.error("Please enter contact number");
       return;
     }
 
     setSubmitting(true);
 
-    const formData = new FormData();
-    formData.append("file", photoFile);
+    let photoUrl = "";
+    let photoBlobName = "";
 
-    const uploadResponse = await fetch("/api/upload", {
-      method: "POST",
-      body: formData
-    });
-    const uploadData = await uploadResponse.json();
+    // Upload photo if provided (optional)
+    if (photoFile) {
+      const formData = new FormData();
+      formData.append("file", photoFile);
 
-    if (!uploadResponse.ok) {
-      toast.error(uploadData.error ?? "Photo upload failed");
-      setSubmitting(false);
-      return;
+      const uploadResponse = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      });
+      const uploadData = await uploadResponse.json();
+
+      if (!uploadResponse.ok) {
+        toast.error(uploadData.error ?? "Photo upload failed");
+        setSubmitting(false);
+        return;
+      }
+
+      photoUrl = uploadData.url;
+      photoBlobName = uploadData.blobName;
     }
 
     const bookingResponse = await fetch("/api/bookings", {
@@ -176,8 +195,8 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
         roomId,
         userName,
         contactNumber,
-        photoUrl: uploadData.url,
-        photoBlobName: uploadData.blobName
+        photoUrl,
+        photoBlobName
       })
     });
 
@@ -192,7 +211,6 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
     toast.success("Room booked successfully");
     setHotelId("");
     setRoomType("");
-    setBedSize("");
     setRoomId("");
     setUserName("");
     setContactNumber("");
@@ -224,30 +242,27 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
               {roomTypes.map((type) => <option key={type} value={type}>{type}</option>)}
             </Select>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Bed size</label>
-            <Select disabled={!hotelId} value={bedSize} onChange={(event) => setBedSize(event.target.value)}>
-              <option value="">Any</option>
-              {bedSizes.map((size) => <option key={size} value={size}>{size}</option>)}
-            </Select>
-          </div>
           <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-medium text-slate-700">Available room</label>
             <Select disabled={!hotelId || filteredRooms.length === 0} value={roomId} onChange={(event) => setRoomId(event.target.value)}>
               <option value="">Select room</option>
-              {filteredRooms.map((room) => <option key={room._id} value={room._id}>{room.name} - {room.roomType} / {room.bedSize}</option>)}
+              {filteredRooms.map((room) => (
+                <option key={room._id} value={room._id}>
+                  Room No: {room.name} - {room.roomType} - {room.occupancy} {room.occupancy === 1 ? "person" : "people"}
+                </option>
+              ))}
             </Select>
           </div>
           <div className="space-y-2 md:col-span-2">
-            <label className="text-sm font-medium text-slate-700">Contact number</label>
+            <label className="text-sm font-medium text-slate-700">Contact number <span className="text-red-500">*</span></label>
             <Input placeholder="Enter phone number" value={contactNumber} onChange={(event) => setContactNumber(event.target.value)} />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <label className="text-sm font-medium text-slate-700">Resident name</label>
+            <label className="text-sm font-medium text-slate-700">Resident name <span className="text-red-500">*</span></label>
             <Input placeholder="Enter resident name" value={userName} onChange={(event) => setUserName(event.target.value)} />
           </div>
           <div className="space-y-2 md:col-span-2">
-            <label className="text-sm font-medium text-slate-700">Resident photo</label>
+            <label className="text-sm font-medium text-slate-700">Resident photo <span className="text-xs text-slate-500">(optional)</span></label>
             <div className="flex flex-col gap-3">
               <Button
                 type="button"
@@ -295,6 +310,13 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
             {previewUrl ? (
               <div className="relative h-[360px]">
                 <Image alt="Resident preview" className="object-cover" fill sizes="480px" src={previewUrl} unoptimized />
+                <Button
+                  type="button"
+                  className="absolute bottom-4 right-4 bg-white/90 text-slate-800 hover:bg-white"
+                  onClick={() => setShowFullPhoto(true)}
+                >
+                  🔍 View Full Photo
+                </Button>
               </div>
             ) : (
               <div className="flex h-[360px] items-center justify-center px-8 text-center text-sm text-slate-500">Photo preview appears here after camera capture or upload.</div>
@@ -339,6 +361,29 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
                 📸 Capture Photo
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full Photo View Modal */}
+      {showFullPhoto && previewUrl && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/95 p-4" onClick={() => setShowFullPhoto(false)}>
+          <div className="relative max-h-[90vh] max-w-5xl" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="absolute -right-4 -top-4 rounded-full bg-white p-2 text-2xl text-slate-800 hover:bg-slate-100"
+              onClick={() => setShowFullPhoto(false)}
+            >
+              ✕
+            </button>
+            <Image
+              alt="Full size resident photo"
+              className="rounded-2xl object-contain"
+              fill
+              sizes="90vw"
+              src={previewUrl}
+              unoptimized
+            />
           </div>
         </div>
       )}

@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const booking = await createBooking({ ...parsed.data, userId: auth.session!.userId });
+    const booking = await createBooking({ ...parsed.data, photoUrl: parsed.data.photoUrl || "", userId: auth.session!.userId });
     return ok({ booking }, 201);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Booking failed";

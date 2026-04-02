@@ -17,7 +17,7 @@ export const roomSchema = z.object({
   hotelId: z.string().min(1),
   name: z.string().min(1).max(80).trim(),
   roomType: z.enum(ROOM_TYPES),
-  bedSize: z.enum(BED_SIZES)
+  occupancy: z.number().min(1).max(10)
 });
 
 export const userSchema = z.object({
@@ -31,7 +31,7 @@ export const bookingSchema = z.object({
   roomId: z.string().min(1),
   userName: z.string().min(2).max(100).trim(),
   contactNumber: z.string().min(8).max(20).regex(/^[0-9+\-() ]+$/, "Invalid phone number"),
-  photoUrl: z.string().url(),
+  photoUrl: z.string().url().optional().or(z.literal("")),
   photoBlobName: z.string().optional()
 });
 
