@@ -29,12 +29,14 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
   const [roomType, setRoomType] = useState("");
   const [bedSize, setBedSize] = useState("");
   const [roomId, setRoomId] = useState("");
+  const [userName, setUserName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -83,12 +85,12 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
     }
 
     return () => stopCamera();
-  }, [showCamera]);
+  }, [showCamera, facingMode]);
 
   async function startCamera() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" }
+        video: { facingMode }
       });
       setCameraStream(stream);
       if (videoRef.current) {
@@ -98,6 +100,10 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
       toast.error("Unable to access camera. Please allow camera permissions.");
       setShowCamera(false);
     }
+  }
+
+  function switchCamera() {
+    setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
   }
 
   function stopCamera() {
@@ -168,6 +174,7 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
       body: JSON.stringify({
         hotelId,
         roomId,
+        userName,
         contactNumber,
         photoUrl: uploadData.url,
         photoBlobName: uploadData.blobName
@@ -187,6 +194,7 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
     setRoomType("");
     setBedSize("");
     setRoomId("");
+    setUserName("");
     setContactNumber("");
     setPhotoFile(null);
     router.refresh();
@@ -233,6 +241,10 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
           <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-medium text-slate-700">Contact number</label>
             <Input placeholder="Enter phone number" value={contactNumber} onChange={(event) => setContactNumber(event.target.value)} />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <label className="text-sm font-medium text-slate-700">Resident name</label>
+            <Input placeholder="Enter resident name" value={userName} onChange={(event) => setUserName(event.target.value)} />
           </div>
           <div className="space-y-2 md:col-span-2">
             <label className="text-sm font-medium text-slate-700">Resident photo</label>
@@ -305,6 +317,13 @@ export function BookingClient({ hotels }: { hotels: HotelOption[] }) {
               <canvas ref={canvasRef} className="hidden" />
             </div>
             <div className="flex items-center justify-center gap-4 bg-white p-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={switchCamera}
+              >
+                🔄 Switch Camera
+              </Button>
               <Button
                 type="button"
                 variant="outline"

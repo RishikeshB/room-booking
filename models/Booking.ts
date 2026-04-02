@@ -20,6 +20,10 @@ const bookingSchema = new Schema(
       required: true,
       index: true
     },
+    userName: {
+      type: String,
+      required: true
+    },
     contactNumber: {
       type: String,
       required: true

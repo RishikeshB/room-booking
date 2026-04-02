@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { GlassmorphicRoomGrid } from "@/components/glassmorphic-room-grid";
+import { getServerSession } from "@/lib/auth";
 import { getHotelRoomDetails } from "@/lib/repositories";
 
 export default async function HotelViewPage({ params }: { params: Promise<{ hotelId: string }> }) {
+  const session = await getServerSession();
   const { hotelId } = await params;
   const detail = await getHotelRoomDetails(hotelId);
   const data = detail ? JSON.parse(JSON.stringify(detail)) : null;
@@ -18,7 +20,7 @@ export default async function HotelViewPage({ params }: { params: Promise<{ hote
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 lg:px-6">
       <Link className="text-sm font-semibold text-brand-800" href="/admin">← Back to dashboard</Link>
-      
+
       <div className="panel p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-700">Hotel Rooms</p>
         <h2 className="mt-2 text-3xl font-semibold text-ink">{data.hotel.name}</h2>
@@ -33,7 +35,11 @@ export default async function HotelViewPage({ params }: { params: Promise<{ hote
 
       <div>
         <h3 className="mb-4 text-2xl font-semibold text-ink">Room Status</h3>
-        <GlassmorphicRoomGrid rooms={data.rooms} />
+        <GlassmorphicRoomGrid
+          rooms={data.rooms.map((room: { _id: string; name: string; roomType: "AC" | "Non-AC" | "AC Window"; bedSize: "King" | "Queen" | "Twin"; occupancy: number; status: "available" | "occupied"; booking?: { userName: string; userId: string; photoUrl: string; contactNumber: string; createdAt: string } }) => ({ _id: room._id, name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy, status: room.status, booking: room.booking }))}
+          currentUserId={session?.userId || ""}
+          userRole={session?.role || "user"}
+        />
       </div>
     </div>
   );

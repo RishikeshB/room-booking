@@ -2,22 +2,27 @@
 
 import Image from "next/image";
 
+import { RoomActions } from "@/components/room-actions";
 import { formatDate } from "@/lib/utils";
 
 type Room = {
   _id: string;
   name: string;
-  roomType: "AC" | "Non-AC";
+  roomType: "AC" | "Non-AC" | "AC Window";
   bedSize: "King" | "Queen" | "Twin";
+  occupancy: number;
   status: "available" | "occupied";
   booking?: {
+    _id?: string;
+    userName: string;
+    userId: string;
     photoUrl: string;
     contactNumber: string;
     createdAt: string;
   };
 };
 
-export function GlassmorphicRoomGrid({ rooms }: { rooms: Room[] }) {
+export function GlassmorphicRoomGrid({ rooms, currentUserId, userRole }: { rooms: Room[]; currentUserId: string; userRole: string }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {rooms.map((room) => {
@@ -48,12 +53,15 @@ export function GlassmorphicRoomGrid({ rooms }: { rooms: Room[] }) {
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div className="pl-2">
                   <h3 className="text-xl font-bold text-slate-800">{room.name}</h3>
-                  <div className="mt-1 flex items-center gap-2">
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-white/70 px-2.5 py-1 text-xs font-semibold text-slate-600 backdrop-blur-sm">
                       {room.roomType}
                     </span>
                     <span className="rounded-full bg-white/70 px-2.5 py-1 text-xs font-semibold text-slate-600 backdrop-blur-sm">
                       {room.bedSize}
+                    </span>
+                    <span className="rounded-full bg-white/70 px-2.5 py-1 text-xs font-semibold text-slate-600 backdrop-blur-sm">
+                      {room.occupancy} {room.occupancy === 1 ? "person" : "people"}
                     </span>
                   </div>
                 </div>
@@ -97,6 +105,13 @@ export function GlassmorphicRoomGrid({ rooms }: { rooms: Room[] }) {
                     <div className="space-y-2 pt-2">
                       <div className="flex items-center gap-2 text-sm">
                         <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span className="font-medium text-slate-700">{room.booking.userName}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm">
+                        <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
                         <span className="font-medium text-slate-700">{room.booking.contactNumber}</span>
@@ -121,6 +136,11 @@ export function GlassmorphicRoomGrid({ rooms }: { rooms: Room[] }) {
                     <p className="mt-1 text-xs text-red-500">Ready for allocation</p>
                   </div>
                 )}
+              </div>
+
+              {/* Room Actions */}
+              <div className="mt-4">
+                <RoomActions room={room} currentUserId={currentUserId} userRole={userRole} />
               </div>
             </div>
           </div>

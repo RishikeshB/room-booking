@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { BED_SIZES, ROOM_TYPES } from "@/lib/constants";
 
 type Hotel = {
   _id: string;
@@ -21,6 +22,14 @@ type Hotel = {
   availableRooms: number;
 };
 
+type RoomFormState = {
+  hotelId: string;
+  name: string;
+  roomType: (typeof ROOM_TYPES)[number];
+  bedSize: (typeof BED_SIZES)[number];
+  occupancy: number;
+};
+
 type User = {
   _id: string;
   username: string;
@@ -30,8 +39,10 @@ type User = {
 export function DashboardClient({ hotels, users, role }: { hotels: Hotel[]; users: User[]; role: string }) {
   const router = useRouter();
   const [hotelForm, setHotelForm] = useState({ name: "", location: "", description: "" });
+  const [roomForm, setRoomForm] = useState<RoomFormState>({ hotelId: "", name: "", roomType: ROOM_TYPES[0], bedSize: BED_SIZES[0], occupancy: 1 });
   const [userForm, setUserForm] = useState({ username: "", password: "", role: "user" });
   const [hotelLoading, setHotelLoading] = useState(false);
+  const [roomLoading, setRoomLoading] = useState(false);
   const [userLoading, setUserLoading] = useState(false);
 
   const isAdmin = role === "admin";
@@ -56,6 +67,29 @@ export function DashboardClient({ hotels, users, role }: { hotels: Hotel[]; user
 
     toast.success("Hotel created");
     setHotelForm({ name: "", location: "", description: "" });
+    router.refresh();
+  }
+
+  async function createRoom(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setRoomLoading(true);
+
+    const response = await fetch("/api/rooms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(roomForm)
+    });
+
+    const data = await response.json();
+    setRoomLoading(false);
+
+    if (!response.ok) {
+      toast.error(data.error ?? "Unable to create room");
+      return;
+    }
+
+    toast.success("Room created");
+    setRoomForm({ hotelId: "", name: "", roomType: ROOM_TYPES[0], bedSize: BED_SIZES[0], occupancy: 1 });
     router.refresh();
   }
 
@@ -150,6 +184,72 @@ export function DashboardClient({ hotels, users, role }: { hotels: Hotel[]; user
               <Textarea value={hotelForm.description} onChange={(event) => setHotelForm((current) => ({ ...current, description: event.target.value }))} />
             </div>
             <Button className="w-full" disabled={hotelLoading} type="submit">{hotelLoading ? "Saving..." : "Create hotel"}</Button>
+          </form>
+        )}
+
+        {isAdmin && (
+          <form className="panel space-y-4 p-5" onSubmit={createRoom}>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-700">Room management</p>
+              <h2 className="mt-2 text-2xl font-semibold text-ink">Add room</h2>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700">Select hotel</label>
+              <Select value={roomForm.hotelId} onChange={(event) => setRoomForm((current) => ({ ...current, hotelId: event.target.value }))}>
+                <option value="">Choose a hotel</option>
+                {hotels.map((hotel) => (
+                  <option key={hotel._id} value={hotel._id}>
+                    {hotel.name} - {hotel.location}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            {roomForm.hotelId && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Room name / number</label>
+                  <Input value={roomForm.name} onChange={(event) => setRoomForm((current) => ({ ...current, name: event.target.value }))} placeholder="e.g., 101, Room A" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Room type</label>
+                  <Select value={roomForm.roomType} onChange={(event) => setRoomForm((current) => ({ ...current, roomType: event.target.value as typeof ROOM_TYPES[number] }))}>
+                    {ROOM_TYPES.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Bed size</label>
+                  <Select value={roomForm.bedSize} onChange={(event) => setRoomForm((current) => ({ ...current, bedSize: event.target.value as typeof BED_SIZES[number] }))}>
+                    {BED_SIZES.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Occupancy (no. of people)</label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="10"
+                    value={roomForm.occupancy}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      if (value === '' || /^\d+$/.test(value)) {
+                        const numValue = parseInt(value) || 1;
+                        setRoomForm((current) => ({ ...current, occupancy: Math.min(10, Math.max(1, numValue)) }));
+                      }
+                    }}
+                    placeholder="Enter occupancy (1-10)"
+                  />
+                </div>
+                <Button className="w-full" disabled={roomLoading} type="submit">{roomLoading ? "Saving..." : "Create room"}</Button>
+              </>
+            )}
           </form>
         )}
 

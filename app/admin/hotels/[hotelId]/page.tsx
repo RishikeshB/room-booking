@@ -5,10 +5,12 @@ import { HotelSettingsForm } from "@/components/admin/hotel-settings-form";
 import { RoomForm } from "@/components/admin/room-form";
 import { RoomManager } from "@/components/admin/room-manager";
 import { GlassmorphicRoomGrid } from "@/components/glassmorphic-room-grid";
+import { getServerSession } from "@/lib/auth";
 import { getHotelRoomDetails } from "@/lib/repositories";
 
 export default async function HotelDetailPage({ params }: { params: Promise<{ hotelId: string }> }) {
   const { hotelId } = await params;
+  const session = await getServerSession();
   const detail = await getHotelRoomDetails(hotelId);
   const data = detail ? JSON.parse(JSON.stringify(detail)) : null;
 
@@ -36,7 +38,7 @@ export default async function HotelDetailPage({ params }: { params: Promise<{ ho
           </div>
           <HotelSettingsForm hotel={data.hotel} />
           <RoomForm hotelId={hotelId} />
-          <RoomManager rooms={data.rooms.map((room: { _id: string; name: string; roomType: "AC" | "Non-AC"; bedSize: "King" | "Queen" | "Twin"; status: "available" | "occupied" }) => ({ _id: room._id, name: room.name, roomType: room.roomType, bedSize: room.bedSize, status: room.status }))} />
+          <RoomManager rooms={data.rooms.map((room: { _id: string; name: string; roomType: "AC" | "Non-AC" | "AC Window"; bedSize: "King" | "Queen" | "Twin"; occupancy: number; status: "available" | "occupied" }) => ({ _id: room._id, name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy, status: room.status }))} />
         </div>
         <div>
           <div className="mb-4 flex items-center justify-between gap-4">
@@ -45,7 +47,11 @@ export default async function HotelDetailPage({ params }: { params: Promise<{ ho
               <h2 className="mt-2 text-3xl font-semibold text-ink">Live room status</h2>
             </div>
           </div>
-          <GlassmorphicRoomGrid rooms={data.rooms} />
+          <GlassmorphicRoomGrid
+            rooms={data.rooms.map((room: { _id: string; name: string; roomType: "AC" | "Non-AC" | "AC Window"; bedSize: "King" | "Queen" | "Twin"; occupancy: number; status: "available" | "occupied"; booking?: { userName: string; userId: string; photoUrl: string; contactNumber: string; createdAt: string } }) => ({ _id: room._id, name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy, status: room.status, booking: room.booking }))}
+            currentUserId={session?.userId || ""}
+            userRole={session?.role || "user"}
+          />
         </div>
       </section>
     </div>

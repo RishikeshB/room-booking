@@ -68,6 +68,7 @@ export async function createBooking({
   hotelId,
   roomId,
   userId,
+  userName,
   contactNumber,
   photoUrl,
   photoBlobName
@@ -75,6 +76,7 @@ export async function createBooking({
   hotelId: string;
   roomId: string;
   userId: string;
+  userName: string;
   contactNumber: string;
   photoUrl: string;
   photoBlobName?: string;
@@ -95,6 +97,7 @@ export async function createBooking({
     hotelId,
     roomId,
     userId,
+    userName,
     contactNumber,
     photoUrl,
     photoBlobName

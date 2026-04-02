@@ -13,12 +13,14 @@ type RoomFormState = {
   name: string;
   roomType: (typeof ROOM_TYPES)[number];
   bedSize: (typeof BED_SIZES)[number];
+  occupancy: number;
 };
 
 const initialState: RoomFormState = {
   name: "",
   roomType: ROOM_TYPES[0],
-  bedSize: BED_SIZES[0]
+  bedSize: BED_SIZES[0],
+  occupancy: 1
 };
 
 export function RoomForm({ hotelId }: { hotelId: string }) {
@@ -70,6 +72,23 @@ export function RoomForm({ hotelId }: { hotelId: string }) {
         <Select value={form.bedSize} onChange={(event) => setForm((current) => ({ ...current, bedSize: event.target.value as RoomFormState["bedSize"] }))}>
           {BED_SIZES.map((option) => <option key={option} value={option}>{option}</option>)}
         </Select>
+      </div>
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-slate-700">Occupancy (no. of people)</label>
+        <Input
+          type="number"
+          min="1"
+          max="10"
+          value={form.occupancy}
+          onChange={(event) => {
+            const value = event.target.value;
+            if (value === '' || /^\d+$/.test(value)) {
+              const numValue = parseInt(value) || 1;
+              setForm((current) => ({ ...current, occupancy: Math.min(10, Math.max(1, numValue)) }));
+            }
+          }}
+          placeholder="Enter occupancy (1-10)"
+        />
       </div>
       <Button className="w-full" disabled={loading} type="submit">{loading ? "Saving..." : "Create room"}</Button>
     </form>

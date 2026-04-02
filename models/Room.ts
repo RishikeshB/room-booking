@@ -15,13 +15,20 @@ const roomSchema = new Schema(
     },
     roomType: {
       type: String,
-      enum: ["AC", "Non-AC"],
+      enum: ["AC", "AC Window", "Non-AC"],
       required: true
     },
     bedSize: {
       type: String,
       enum: ["King", "Queen", "Twin"],
       required: true
+    },
+    occupancy: {
+      type: Number,
+      required: true,
+      default: 1,
+      min: 1,
+      max: 10
     },
     status: {
       type: String,

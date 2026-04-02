@@ -14,15 +14,16 @@ type Room = {
   name: string;
   roomType: (typeof ROOM_TYPES)[number];
   bedSize: (typeof BED_SIZES)[number];
+  occupancy: number;
   status: "available" | "occupied";
 };
 
-type Drafts = Record<string, Pick<Room, "name" | "roomType" | "bedSize">>;
+type Drafts = Record<string, Pick<Room, "name" | "roomType" | "bedSize" | "occupancy">>;
 
 export function RoomManager({ rooms }: { rooms: Room[] }) {
   const router = useRouter();
   const [drafts, setDrafts] = useState<Drafts>(
-    Object.fromEntries(rooms.map((room) => [room._id, { name: room.name, roomType: room.roomType, bedSize: room.bedSize }]))
+    Object.fromEntries(rooms.map((room) => [room._id, { name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy }]))
   );
   const [savingId, setSavingId] = useState<string | null>(null);
 
@@ -74,22 +75,45 @@ export function RoomManager({ rooms }: { rooms: Room[] }) {
               <p className="font-semibold text-ink">{room.name}</p>
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${room.status === "occupied" ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`}>{room.status}</span>
             </div>
-            <div className="grid gap-3 md:grid-cols-[1fr_0.8fr_0.8fr_auto] md:items-end">
+            <div className="grid gap-3 md:grid-cols-[1fr_0.8fr_0.6fr_0.6fr_auto] md:items-end">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">Room name</label>
-                <Input value={drafts[room._id]?.name ?? room.name} onChange={(event) => setDrafts((current) => ({ ...current, [room._id]: { ...(current[room._id] ?? { name: room.name, roomType: room.roomType, bedSize: room.bedSize }), name: event.target.value } }))} />
+                <Input value={drafts[room._id]?.name ?? room.name} onChange={(event) => setDrafts((current) => ({ ...current, [room._id]: { ...(current[room._id] ?? { name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy }), name: event.target.value } }))} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">Room type</label>
-                <Select value={drafts[room._id]?.roomType ?? room.roomType} onChange={(event) => setDrafts((current) => ({ ...current, [room._id]: { ...(current[room._id] ?? { name: room.name, roomType: room.roomType, bedSize: room.bedSize }), roomType: event.target.value as Room["roomType"] } }))}>
+                <Select value={drafts[room._id]?.roomType ?? room.roomType} onChange={(event) => setDrafts((current) => ({ ...current, [room._id]: { ...(current[room._id] ?? { name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy }), roomType: event.target.value as Room["roomType"] } }))}>
                   {ROOM_TYPES.map((option) => <option key={option} value={option}>{option}</option>)}
                 </Select>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">Bed size</label>
-                <Select value={drafts[room._id]?.bedSize ?? room.bedSize} onChange={(event) => setDrafts((current) => ({ ...current, [room._id]: { ...(current[room._id] ?? { name: room.name, roomType: room.roomType, bedSize: room.bedSize }), bedSize: event.target.value as Room["bedSize"] } }))}>
+                <Select value={drafts[room._id]?.bedSize ?? room.bedSize} onChange={(event) => setDrafts((current) => ({ ...current, [room._id]: { ...(current[room._id] ?? { name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy }), bedSize: event.target.value as Room["bedSize"] } }))}>
                   {BED_SIZES.map((option) => <option key={option} value={option}>{option}</option>)}
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Occupancy</label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="10"
+                  value={drafts[room._id]?.occupancy ?? room.occupancy}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    if (value === '' || /^\d+$/.test(value)) {
+                      const numValue = parseInt(value) || 1;
+                      setDrafts((current) => ({
+                        ...current,
+                        [room._id]: {
+                          ...(current[room._id] ?? { name: room.name, roomType: room.roomType, bedSize: room.bedSize, occupancy: room.occupancy }),
+                          occupancy: Math.min(10, Math.max(1, numValue))
+                        }
+                      }));
+                    }
+                  }}
+                  placeholder="1-10"
+                />
               </div>
               <Button disabled={savingId === room._id} onClick={() => saveRoom(room._id)} type="button">
                 {savingId === room._id ? "Saving..." : "Save"}

@@ -29,6 +29,7 @@ export const userSchema = z.object({
 export const bookingSchema = z.object({
   hotelId: z.string().min(1),
   roomId: z.string().min(1),
+  userName: z.string().min(2).max(100).trim(),
   contactNumber: z.string().min(8).max(20).regex(/^[0-9+\-() ]+$/, "Invalid phone number"),
   photoUrl: z.string().url(),
   photoBlobName: z.string().optional()
