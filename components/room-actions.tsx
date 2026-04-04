@@ -251,7 +251,15 @@ export function RoomActions({ room, currentUserId, userRole }: { room: Room; cur
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
                         <div className="relative h-16 w-16 overflow-hidden rounded-xl bg-slate-100">
-                          <img alt={booking.userName} className="h-full w-full object-cover" src={booking.photoUrl} />
+                          {booking.photoUrl ? (
+                            <img alt={booking.userName} className="h-full w-full object-cover" src={booking.photoUrl} />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-slate-400">
+                              <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
+                            </div>
+                          )}
                         </div>
                         <div>
                           <p className="font-semibold text-slate-800">{booking.userName}</p>

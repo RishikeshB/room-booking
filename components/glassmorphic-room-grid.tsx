@@ -90,22 +90,32 @@ export function GlassmorphicRoomGrid({ rooms, currentUserId, userRole }: { rooms
                     <div className="space-y-3">
                       {/* Resident photo */}
                       <div className="relative mx-auto h-32 w-full overflow-hidden rounded-xl bg-slate-100">
-                        <Image
-                          alt={room.name}
-                          className="object-cover"
-                          fill
-                          sizes="200px"
-                          src={room.booking.photoUrl}
-                          unoptimized
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                        <button
-                          type="button"
-                          className="absolute bottom-2 right-2 rounded-lg bg-white/90 px-2.5 py-1.5 text-xs font-medium text-slate-800 shadow-lg hover:bg-white"
-                          onClick={() => setViewPhotoRoom(room)}
-                        >
-                          🔍 View Photo
-                        </button>
+                        {room.booking.photoUrl ? (
+                          <>
+                            <Image
+                              alt={room.name}
+                              className="object-cover"
+                              fill
+                              sizes="200px"
+                              src={room.booking.photoUrl}
+                              unoptimized
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                            <button
+                              type="button"
+                              className="absolute bottom-2 right-2 rounded-lg bg-white/90 px-2.5 py-1.5 text-xs font-medium text-slate-800 shadow-lg hover:bg-white"
+                              onClick={() => setViewPhotoRoom(room)}
+                            >
+                              🔍 View Photo
+                            </button>
+                          </>
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-slate-400">
+                            <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          </div>
+                        )}
                       </div>
 
                       {/* Contact info */}
@@ -156,7 +166,7 @@ export function GlassmorphicRoomGrid({ rooms, currentUserId, userRole }: { rooms
       </div>
 
       {/* Full Photo View Modal */}
-      {viewPhotoRoom && viewPhotoRoom.booking && (
+      {viewPhotoRoom && viewPhotoRoom.booking && viewPhotoRoom.booking.photoUrl && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/95 p-4" onClick={() => setViewPhotoRoom(null)}>
           <div
             className="relative flex h-[80vh] w-full max-w-5xl items-center justify-center"

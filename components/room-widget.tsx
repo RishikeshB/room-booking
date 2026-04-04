@@ -22,9 +22,17 @@ export function RoomWidget({ room }: { room: any }) {
         </div>
         {room.booking ? (
           <div className="mt-4 space-y-3">
-            <div className="relative h-44 overflow-hidden rounded-3xl bg-slate-100">
-              <Image alt={room.name} className="object-cover" fill sizes="400px" src={room.booking.photoUrl} />
-            </div>
+            {room.booking.photoUrl ? (
+              <div className="relative h-44 overflow-hidden rounded-3xl bg-slate-100">
+                <Image alt={room.name} className="object-cover" fill sizes="400px" src={room.booking.photoUrl} />
+              </div>
+            ) : (
+              <div className="flex h-44 items-center justify-center rounded-3xl bg-slate-100 text-slate-400">
+                <svg className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+            )}
             <div>
               <p className="font-semibold text-ink">Contact</p>
               <p>{room.booking.contactNumber}</p>

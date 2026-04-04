@@ -30,7 +30,7 @@ const bookingSchema = new Schema(
     },
     photoUrl: {
       type: String,
-      required: true
+      default: ""
     },
     photoBlobName: String,
     status: {
