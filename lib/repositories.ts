@@ -94,9 +94,9 @@ export async function createBooking({
   }
 
   const booking = await Booking.create({
-    hotelId,
-    roomId,
-    userId,
+    hotelId: new Types.ObjectId(hotelId),
+    roomId: new Types.ObjectId(roomId),
+    userId: new Types.ObjectId(userId),
     userName,
     contactNumber,
     photoUrl,
