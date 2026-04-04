@@ -1,0 +1,16 @@
+[
+  {
+    "_id": "69d0c335e9cda9e4fc8bf20e",
+    "hotelId": "69cba34feb346afb2ef7514d",
+    "roomId": "69ce8186b56074f74061803d",
+    "userId": "69cb9e1ddb8be28ceb7eea88",
+    "userName": "Prithivi raj",
+    "contactNumber": "7538858558",
+    "photoUrl": "https://testingknown.blob.core.windows.net/resident-photos/1775289139588-captured-photo.png",
+    "photoBlobName": "1775289139588-captured-photo.png",
+    "status": "cancelled",
+    "createdAt": "2026-04-04T07:52:21.601Z",
+    "updatedAt": "2026-04-04T08:11:54.560Z",
+    "__v": 0
+  }
+]
